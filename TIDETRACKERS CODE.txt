@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Sea App - Coastal Emergency Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            height: fit-content;
+        }
+        .menu-item {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        .menu-item:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        .menu-item.active {
+            background: #2c3e50;
+        }
+        .content-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            min-height: 600px;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .weather-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #3498db;
+            transition: transform 0.3s ease;
+        }
+        .weather-card:hover {
+            transform: translateY(-5px);
+        }
+        .weather-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .weather-card .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .alert-card {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #f39c12;
+            transition: transform 0.3s ease;
+        }
+        .alert-card:hover {
+            transform: translateX(5px);
+        }
+        .alert-card.high {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            border-left-color: #e74c3c;
+        }
+        .alert-card.medium {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+            border-left-color: #f39c12;
+        }
+        .alert-card.low {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            border-left-color: #28a745;
+        }
+        .route-card, .protocol-card, .contact-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #27ae60;
+            transition: transform 0.3s ease;
+        }
+        .route-card:hover, .protocol-card:hover, .contact-card:hover {
+            transform: translateX(5px);
+        }
+        .forum-post {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #9b59b6;
+            transition: transform 0.3s ease;
+        }
+        .forum-post:hover {
+            transform: translateX(5px);
+        }
+        .forum-post .user {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .forum-post .time {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .forum-post .message {
+            margin: 10px 0;
+        }
+        .forum-post .likes {
+            color: #e74c3c;
+            font-size: 0.9em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #219a52;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .emergency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .emergency-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #e74c3c;
+            transition: transform 0.3s ease;
+        }
+        .emergency-section:hover {
+            transform: translateY(-5px);
+        }
+        .emergency-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .emergency-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .emergency-section li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .emergency-section li:last-child {
+            border-bottom: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-active {
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+        .status-warning {
+            background: #f39c12;
+            animation: pulse 2s infinite;
+        }
+
+        .status-danger {
+            background: #e74c3c;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .time-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+           } 
+          .sidebar {
+                order: 2;
+            }
+            .content-area {
+                order: 1;
+            }
+            
+            .weather-grid {
+                grid-template-columns: 1fr;
+            }
+                       .emergency-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2em;
+            }
+            .time-display {
+                position: static;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="time-display" id="currentTime"></div>
+        <div class="container">
+        <div class="header">
+            <h1>🌊 Safe Sea App 🌊</h1>
+            <p>Coastal Emergency Management System - Protecting communities through timely information and resources</p>
+        </div>
+        <div class="main-content">
+            <div class="sidebar">
+                <button class="menu-item active" onclick="showSection('home')">🏠 Home Dashboard</button>
+                <button class="menu-item" onclick="showSection('alerts')">🚨 Alerts & Notifications</button>
+                <button class="menu-item" onclick="showSection('evacuation')">🚶 Evacuation Routes</button>
+                <button class="menu-item" onclick="showSection('safety')">🛡️ Safety Protocols</button>
+                <button class="menu-item" onclick="showSection('forum')">💬 Community Forum</button>
+                <button class="menu-item" onclick="showSection('emergency')">📞 Emergency Contacts</button>
+                <button class="menu-item" onclick="showSection('resources')">🏥 Emergency Resources</button>
+            </div>
+            <div class="content-area">
+                <!-- Home Section -->
+                <div id="home" class="section active">
+                    <h2>Home Dashboard</h2>
+                                     <h3>🌤️ Current Weather</h3>
+                    <div class="weather-grid">
+                        <div class="weather-card">
+                            <h3>🌡️ Temperature</h3>
+                            <div class="value" id="temperature">28°C</div>
+                        </div>
+                        <div class="weather-card">
+                            <h3>🌪️ Wind Speed</h3>
+                            <div class="value" id="windSpeed">15 km/h</div>
+                        </div>
+                        <div class="weather-card">
+                            <h3>🌊 Wave Height</h3>
+                            <div class="value" id="waveHeight">2.1m</div>
+                        </div>
+                        <div class="weather-card">
+                            <h3>💧 Humidity</h3>
+                            <div class="value" id="humidity">78%</div>
+                        </div>
+                        <div class="weather-card">
+                            <h3>☁️ Condition</h3>
+                            <div class="value" id="condition">Partly Cloudy</div>
+                        </div>
+                    </div>
+                    <h3>🚨 Active Alerts</h3>
+                    <div id="homeAlerts"></div>
+                </div>
+                <!-- Alerts Section -->
+                <div id="alerts" class="section">
+                    <h2>🚨 Alerts & Notifications</h2>
+                    <div id="alertsList"></div>
+                </div>
+                <!-- Evacuation Section -->
+                <div id="evacuation" class="section">
+                    <h2>🚶 Evacuation Routes</h2>
+                    <p>ℹ️ Choose the nearest safe route based on your location</p>
+                    <div id="evacuationRoutes"></div>
+                </div>
+                <!-- Safety Section -->
+                <div id="safety" class="section">
+                    <h2>🛡️ Safety Protocols</h2>
+                    <div id="safetyProtocols"></div>
+                </div>
+                <!-- Forum Section -->
+                <div id="forum" class="section">
+                    <h2>💬 Community Forum</h2>
+                    <div id="forumPosts"></div>
+                    
+                    <div class="form-group">
+                        <label for="newPost">Add New Post:</label>
+                        <textarea id="newPost" rows="3" placeholder="Share updates, ask questions, or offer help..."></textarea>
+                        <button class="btn btn-success" onclick="addForumPost()">Post Message</button>
+                    </div>
+                </div>
+                <!-- Emergency Section -->
+                <div id="emergency" class="section">
+                    <h2>📞 Emergency Contacts</h2>
+                    <p>⚠️ Click any contact to simulate call</p>
+                    <div id="emergencyContacts"></div>
+                </div>
+                <!-- Resources Section -->
+                <div id="resources" class="section">
+                    <h2>🏥 Emergency Resources</h2>
+                    <div class="emergency-grid">
+                        <div class="emergency-section">
+                            <h3>🏥 Medical Facilities</h3>
+                            <ul>
+                                <li>• Coastal General Hospital - 2.1 km</li>
+                                <li>• Primary Health Center - 1.5 km</li>
+                                <li>• Emergency Medical Services - 0.8 km</li>
+                                <li>• Blood Bank - 3.2 km</li>
+                            </ul>
+                        </div>
+                        <div class="emergency-section">
+                            <h3>🏠 Emergency Shelters</h3>
+                            <ul>
+                                <li>• Community Center - 0.8 km</li>
+                                <li>• Government School - 1.2 km</li>
+                                <li>• Town Hall - 1.8 km</li>
+                                <li>• Sports Complex - 2.5 km</li>
+                            </ul>
+                        </div>
+                        <div class="emergency-section">
+                            <h3>🚒 Emergency Services</h3>
+                            <ul>
+                                <li>• Fire Station - 1.1 km</li>
+                                <li>• Police Station - 0.9 km</li>
+                                <li>• Coast Guard - 2.3 km</li>
+                                <li>• Rescue Team - 1.7 km</li>
+                            </ul>
+                        </div>
+                        <div class="emergency-section">
+                            <h3>🛒 Supply Centers</h3>
+                            <ul>
+                                <li>• Food Distribution - 1.4 km</li>
+                                <li>• Water Supply - 0.7 km</li>
+                                <li>• Medical Supplies - 2.0 km</li>
+                                <li>• Fuel Station - 1.6 km</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal for Emergency Calls -->
+    <div id="callModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>📞 Emergency Call</h2>
+            <p id="callMessage"></p>
+            <button class="btn btn-danger" onclick="closeModal()">End Call</button>
+        </div>
+    </div>
+    <script>
+        // Sample data
+        const alertsData = [
+            { type: 'high', title: 'High Tide Warning', message: 'Exceptionally high tide expected at 3:30 PM. Coastal areas may experience flooding.', time: '2 hours ago' },
+            { type: 'medium', title: 'Strong Wind Advisory', message: 'Wind speeds up to 45 km/h expected. Secure loose objects and avoid coastal areas.', time: '4 hours ago' },
+            { type: 'low', title: 'Weather Update', message: 'Partly cloudy conditions expected to continue. No immediate concerns.', time: '6 hours ago' }
+        ];
+        const evacuationRoutes = [
+            { name: 'Route A - Main Highway', distance: '2.3 km', status: 'active', description: 'Primary evacuation route via Main Highway to Highland Shelter' },
+            { name: 'Route B - Coastal Road', distance: '1.8 km', status: 'warning', description: 'Secondary route via Coastal Road - Use only if Route A is blocked' },
+            { name: 'Route C - Mountain Path', distance: '3.1 km', status: 'active', description: 'Alternative mountain route to Upper Valley Shelter' }
+        ];
+        const safetyProtocols = [
+            { title: 'Tsunami Warning Protocol', steps: ['Listen for official warnings', 'Move to higher ground immediately', 'Stay away from beaches', 'Follow evacuation routes'] },
+            { title: 'Storm Surge Protocol', steps: ['Secure your property', 'Stock emergency supplies', 'Avoid flooded areas', 'Monitor weather updates'] },
+            { title: 'High Wind Protocol', steps: ['Stay indoors', 'Secure loose objects', 'Avoid coastal areas', 'Keep emergency kit ready'] }
+        ];
+        const emergencyContacts = [
+            { name: 'Emergency Services', number: '911', description: 'Fire, Police, Medical Emergency' },
+            { name: 'Coast Guard', number: '1-800-COAST', description: 'Marine Emergency & Rescue' },
+            { name: 'Disaster Management', number: '1-800-DISASTER', description: 'Emergency Coordination' },
+            { name: 'Weather Service', number: '1-800-WEATHER', description: 'Weather Updates & Warnings' }
+        ];
+        let forumPosts = [
+            { user: 'Sarah M.', time: '15 min ago', message: 'Just saw the high tide warning. Anyone know if the coastal parking lot is still accessible?', likes: 5 },
+            { user: 'Mike D.', time: '1 hour ago', message: 'Evacuation Route A is clear and well-marked. Traffic is moving smoothly.', likes: 12 },
+            { user: 'Emma K.', time: '2 hours ago', message: 'Community center has plenty of supplies and space. Staff is very helpful.', likes: 8 }
+        ];
+        // Initialize the app
+        function init() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            loadAlerts();
+            loadEvacuationRoutes();
+            loadSafetyProtocols();
+            loadEmergencyContacts();
+            loadForumPosts();
+            simulateWeatherUpdates();
+        }
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString();
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });      
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+                       // Update menu active state
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        function loadAlerts() {
+            const alertsList = document.getElementById('alertsList');
+            const homeAlerts = document.getElementById('homeAlerts');           
+            let alertsHTML = '';
+            alertsData.forEach(alert => {
+                const statusClass = alert.type === 'high' ? 'status-danger' : 
+                                   alert.type === 'medium' ? 'status-warning' : 'status-active';
+                                alertsHTML += `
+                    <div class="alert-card ${alert.type}">
+                        <h3><span class="status-indicator ${statusClass}"></span>${alert.title}</h3>
+                        <p>${alert.message}</p>
+                        <small>⏰ ${alert.time}</small>
+                    </div>
+                `;
+            });
+                       alertsList.innerHTML = alertsHTML;
+            homeAlerts.innerHTML = alertsHTML;
+        }
+        function loadEvacuationRoutes() {
+            const routesContainer = document.getElementById('evacuationRoutes');
+            let routesHTML = '';
+                   evacuationRoutes.forEach(route => {
+                const statusClass = route.status === 'active' ? 'status-active' : 'status-warning';
+                routesHTML += `
+                    <div class="route-card">
+                        <h3><span class="status-indicator ${statusClass}"></span>${route.name}</h3>
+                        <p><strong>Distance:</strong> ${route.distance}</p>
+                        <p>${route.description}</p>
+                        <button class="btn" onclick="showRouteDetails('${route.name}')">View Details</button>
+                    </div>
+                `;
+            });
+               routesContainer.innerHTML = routesHTML;
+        }
+        function loadSafetyProtocols() {
+            const protocolsContainer = document.getElementById('safetyProtocols');
+            let protocolsHTML = '';
+                     safetyProtocols.forEach(protocol => {
+                const stepsHTML = protocol.steps.map(step => `<li>${step}</li>`).join('');
+                protocolsHTML += `
+                    <div class="protocol-card">
+                        <h3>${protocol.title}</h3>
+                        <ol>${stepsHTML}</ol>
+                    </div>
+                `;
+            });
+            
+            protocolsContainer.innerHTML = protocolsHTML;
+        }
+        function loadEmergencyContacts() {
+            const contactsContainer = document.getElementById('emergencyContacts');
+            let contactsHTML = '';           
+            emergencyContacts.forEach(contact => {
+                contactsHTML += `
+                    <div class="contact-card">
+                        <h3>${contact.name}</h3>
+                        <p><strong>📞 ${contact.number}</strong></p>
+                        <p>${contact.description}</p>
+                        <button class="btn btn-danger" onclick="makeCall('${contact.name}', '${contact.number}')">Call Now</button>
+                    </div>
+                `;
+            });
+                       contactsContainer.innerHTML = contactsHTML;
+        }
+
+        function loadForumPosts() {
+            const postsContainer = document.getElementById('forumPosts');
+            let postsHTML = '';
+                      forumPosts.forEach(post => {
+                postsHTML += `
+                    <div class="forum-post">
+                        <div class="user">👤 ${post.user}</div>
+                        <div class="time">${post.time}</div>
+                        <div class="message">${post.message}</div>
+                        <div class="likes">❤️ ${post.likes} likes</div>
+                    </div>
+                `;
+            });
+            postsContainer.innerHTML = postsHTML;
+        }
+        function addForumPost() {
+            const textarea = document.getElementById('newPost');
+            const message = textarea.value.trim();           
+            if (message) {
+                const newPost = {
+                    user: 'You',
+                    time: 'Just now',
+                    message: message,
+                    likes: 0
+                };
+                             forumPosts.unshift(newPost);
+                loadForumPosts();
+                textarea.value = '';
+            }
+        }
+        function makeCall(name, number) {
+            document.getElementById('callMessage').textContent = `Calling ${name} at ${number}...`;
+            document.getElementById('callModal').style.display = 'block';
+        }
+        function closeModal() {
+            document.getElementById('callModal').style.display = 'none';
+        }
+        function showRouteDetails(routeName) {
+            alert(`Route Details for ${routeName}\n\nThis would show detailed map and turn-by-turn directions in a real application.`);
+        }
+
+        function simulateWeatherUpdates() {
+            setInterval(() => {
+                // Simulate random weather updates
+                const temps = [26, 27, 28, 29, 30];
+                const winds = [12, 15, 18, 20, 25];
+                const waves = [1.8, 2.1, 2.3, 2.6, 3.0];
+                const humidity = [75, 78, 80, 82, 85];
+                const conditions = ['Sunny', 'Partly Cloudy', 'Cloudy', 'Windy'];               
+                document.getElementById('temperature').textContent = temps[Math.floor(Math.random() * temps.length)] + '°C';
+                document.getElementById('windSpeed').textContent = winds[Math.floor(Math.random() * winds.length)] + ' km/h';
+                document.getElementById('waveHeight').textContent = waves[Math.floor(Math.random() * waves.length)] + 'm';
+                document.getElementById('humidity').textContent = humidity[Math.floor(Math.random() * humidity.length)] + '%';
+                document.getElementById('condition').textContent = conditions[Math.floor(Math.random() * conditions.length)];
+            }, 10000); // Update every 10 seconds
+        }
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('callModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+        // Initialize the app when the page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
